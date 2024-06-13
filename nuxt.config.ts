@@ -1,4 +1,7 @@
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+
 export default defineNuxtConfig({
+  ssr: false,
   app: {
     head: {
       title: "OKX - Sonic Example",
@@ -30,5 +33,9 @@ export default defineNuxtConfig({
      * @default "./components/ui"
      */
     componentDir: "./components/ui",
+  },
+  alias: {},
+  vite: {
+    plugins: [nodePolyfills()],
   },
 });
