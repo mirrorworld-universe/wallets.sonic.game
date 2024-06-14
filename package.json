@@ -9,6 +9,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "0.29.0",
     "@ledgerhq/errors": "6.16.3",
     "@nuxtjs/tailwindcss": "^6.12.0",
     "@radix-icons/vue": "^1.0.0",
@@ -44,6 +45,7 @@
     "vite-plugin-node-polyfills": "^0.22.0"
   },
   "resolutions": {
+    "@coral-xyz/anchor": "0.29.0",
     "@ledgerhq/errors": "6.16.3"
   }
 }

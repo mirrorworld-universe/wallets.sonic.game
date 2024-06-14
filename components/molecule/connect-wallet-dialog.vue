@@ -54,7 +54,7 @@ async function handleSelectWallet(wallet: WalletAdapter) {
   // setWallet(wallet);
   console.log("Selected wallet", wallet);
   if (wallet.publicKey) {
-    console.log("User connected", wallet.publicKey.toBase58());
+    console.log("User connected", wallet?.publicKey?.toBase58?.());
     toggle();
   }
   connectingWallet.value = undefined;

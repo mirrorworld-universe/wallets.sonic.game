@@ -204,7 +204,6 @@ export const sendTransactionWithRetry = async (
   );
   await wait(1000);
 
-  // @ts-expect-error signtx type not yet available on all adapters
   const signedTransaction = await wallet.signTransaction!(tx);
 
   if (beforeSend) {
@@ -224,25 +223,24 @@ export const sendLegacyTransaction = async (
   connection: Connection,
   wallet: WalletAdapter,
   transaction: Transaction,
-  commitment: Commitment = "confirmed",
+  commitment: Commitment = "processed",
   beforeSend?: () => void
 ) => {
   if (!wallet.publicKey) throw new Error("Wallet not connected");
 
-  // @ts-expect-error signtx type not yet available on all adapters
   const signedTransaction = await wallet.signTransaction!(transaction);
 
   if (beforeSend) {
     beforeSend();
   }
 
-  const { txid, slot } = await sendSignedTransaction({
+  const { txid, slot, latency } = await sendSignedTransaction({
     connection,
     signedTransaction,
     commitment,
   });
 
-  return { txid, slot };
+  return { txid, slot, latency };
 };
 export const sendTransaction = async (
   connection: Connection,
@@ -253,25 +251,25 @@ export const sendTransaction = async (
 ) => {
   if (!wallet.publicKey) throw new Error("Wallet not connected");
 
-  // @ts-expect-error signtx type not yet available on all adapters
   const signedTransaction = await wallet.signTransaction!(transaction);
 
   if (beforeSend) {
     beforeSend();
   }
 
-  const { txid, slot } = await sendSignedTransaction({
+  const { txid, slot, latency } = await sendSignedTransaction({
     connection,
     signedTransaction,
     commitment,
   });
 
-  return { txid, slot };
+  return { txid, slot, latency };
 };
 
 export interface Txn {
   txid: string | null;
   slot: number | null;
+  latency: number;
 }
 
 export async function sendSignedTransaction({
@@ -333,10 +331,12 @@ export async function sendSignedTransaction({
     done = true;
   }
 
+  const latency = getUnixTs() - startTime;
+
   if (isDevMode) {
-    console.log("Latency", txid, getUnixTs() - startTime);
+    console.log("Latency", txid, latency);
   }
-  return { txid, slot };
+  return { txid, slot, latency };
 }
 
 export const getUnixTs = () => new Date().getTime() / 1000;

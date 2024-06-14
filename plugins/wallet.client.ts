@@ -2,6 +2,7 @@ import {
   PhantomWalletAdapter,
   NightlyWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+import { BackpackWalletAdapter } from "~/lib/backpack";
 import { _useWalletsStore, walletStorage } from "~/stores/wallets";
 import { pinia } from "~/stores/wallets";
 
@@ -11,15 +12,9 @@ export default defineNuxtPlugin({
   async setup({ vueApp }) {
     vueApp.use(pinia);
 
-    const {
-      $subscribe,
-      connectWallet,
-      connected,
-      setWallet,
-      setWallets,
-      disconnect,
-    } = _useWalletsStore(pinia);
-    const wallets = [new PhantomWalletAdapter(), new NightlyWalletAdapter()];
+    const { $subscribe, connectWallet, connected, setWallet, setWallets } =
+      _useWalletsStore(pinia);
+    const wallets = [new BackpackWalletAdapter()];
 
     setWallets(wallets);
 

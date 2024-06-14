@@ -7,11 +7,11 @@
     <ClientOnly>
       <DropdownMenu v-if="connected">
         <DropdownMenuTrigger as-child>
-          <Button size="lg" class="rounded-full gap-2" variant="outline">
+          <Button class="rounded-full gap-1" variant="outline">
             <img
               v-if="wallet"
               :src="wallet.icon"
-              class="h-6 w-6"
+              class="h-4 w-4"
               :alt="wallet.name"
             />
             <span>{{ shortAddress }}</span>
@@ -19,7 +19,7 @@
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end">
           <DropdownMenuItem
-            class="flex items-center justify-start gap-1 px-4 py-3"
+            class="flex items-center justify-start gap-1 px-3 py-2"
             @click="disconnect"
           >
             <span>Disconnect</span>

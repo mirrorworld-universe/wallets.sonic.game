@@ -2,18 +2,20 @@ import * as walletAdapters from "@solana/wallet-adapter-wallets";
 import {
   PhantomWalletAdapter,
   NightlyWalletAdapter,
-  // @ts-ignore
-  // BackpackWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { useStorage } from "@vueuse/core";
 import { truncateMiddle } from "~/lib/string";
 import { createPinia, defineStore } from "pinia";
 import { wait } from "~/lib/timers";
 import { toast } from "vue-sonner";
+import type { BackpackWalletAdapter } from "~/lib/backpack";
 
 export const pinia = createPinia();
 
-export type WalletAdapter = PhantomWalletAdapter | NightlyWalletAdapter;
+export type WalletAdapter =
+  | PhantomWalletAdapter
+  | NightlyWalletAdapter
+  | BackpackWalletAdapter;
 
 export interface WalletState {
   wallet: WalletAdapter | null;
@@ -60,7 +62,7 @@ export const _useWalletsStore = defineStore("wallet-store", () => {
     return (
       !!wallet.value &&
       !!wallet.value.publicKey &&
-      truncateMiddle(wallet.value.publicKey.toBase58(), 8)
+      truncateMiddle(wallet.value?.publicKey?.toBase58?.(), 8)
     );
   });
   const isWalletConnected = computed(() => !!wallet.value);

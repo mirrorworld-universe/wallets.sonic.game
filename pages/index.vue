@@ -5,9 +5,24 @@
         Sign Transaction Demo | Greeting Program
       </h1>
     </div>
-    <div>Connect your wallet to sign a transaction.</div>
+    <template v-if="greetingAccount">
+      You have greeted {{ greetingAccount.counter }} times. Greet again to
+      increment! 😀
+    </template>
+    <template v-else>
+      <div>Connect your wallet to sign a transaction.</div>
+    </template>
     <template v-if="connected">
-      <Button size="lg" class="rounded-full"> Sign Transaction </Button>
+      <template v-if="isInitialized">
+        <Button size="lg" class="rounded-full" @click="incrementGreeter">
+          Increment Greet Counter
+        </Button>
+      </template>
+      <template v-else>
+        <Button size="lg" class="rounded-full" @click="createGreeterAccount">
+          Initialize Greeter
+        </Button>
+      </template>
     </template>
     <template v-else>
       <Button size="lg" class="rounded-full gap-1" @click="openConnectDialog">
@@ -25,10 +40,21 @@
 import { mitt } from "~/lib/events";
 
 import { _useWalletsStore, pinia } from "~/stores/wallets";
-const { shortAddress, wallet, isConnecting, connected, disconnect } =
-  _useWalletsStore(pinia);
+const { wallet, isConnecting, connected } = _useWalletsStore(pinia);
 
 function openConnectDialog() {
   mitt.emit("connect-wallet:open");
+}
+
+const {
+  isInitialized,
+  greeterAccountAddress,
+  initializeGreeterAccount,
+  greetingAccount,
+  incrementGreeter,
+} = useProgram();
+
+function createGreeterAccount() {
+  initializeGreeterAccount(wallet!.publicKey!);
 }
 </script>
