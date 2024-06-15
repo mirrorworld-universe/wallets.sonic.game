@@ -1,7 +1,7 @@
 # Sonic Transaction Builder & Sender Example:
 
 - Program source code: https://beta.solpg.io/666dc15acffcf4b13384d187
-- Demo URL: https://wallets.sonic.game
+- Demo URL: https://wallets-sonic-game.vercel.app/ or https://wallets.sonic.game
 
 ## Contributing
 
