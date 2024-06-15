@@ -20,8 +20,30 @@ export type GreetingAccountType = {
   authority: PublicKey;
 };
 
+/**
+ * SOURCE CODE FOR THE PROGRAM:
+ * Solana Program:
+ * https://beta.solpg.io/666dc15acffcf4b13384d187
+ */
+
 export function useProgram() {
   useProgramEvents();
+
+  /**
+   * STEP 1: Initialize the connection object to the Sonic cluster
+   * =============================================================
+   * Here we use the `useConnection` composable to initialize the connection object
+   * to the Sonic cluster.
+   *
+   * In code it is initialized like this:
+   *
+   * ```ts
+   * import { Connection } from "@solana/web3.js";
+   * const connection = new Connection("https://devnet.sonic.game", {
+   *  wsEndpoint: "wss://devnet.sonic.game",
+   * });
+   * ```
+   */
   const { connection } = useConnection();
   const { wallet, connected } = useWalletsStore();
 
@@ -103,17 +125,38 @@ export function useProgram() {
 
   async function initializeGreeterAccount(authority: PublicKey) {
     try {
+      /**
+       * STEP 2: Create a new transaction object.
+       * ========================================
+       * At this step we create the transaction we want to send to Sonic.
+       *
+       */
       const tx = await createInitializeGreeterAccountTransaction(authority);
 
       const { blockhash } = await connection.value.getLatestBlockhash();
       tx.recentBlockhash = blockhash;
       tx.feePayer = wallet!.publicKey!;
 
+      /**
+       * STEP 3: Send the transaction to the cluster.
+       * ===========================================
+       * At this step we send the transaction to the cluster.
+       *
+       */
       const { txid, slot } = await sendLegacyTransaction(
         connection.value,
         wallet! as WalletAdapter,
         tx
       );
+
+      /**
+       * STEP 4: Confirm the transaction.
+       * ================================
+       * At this point, the transaction has already been sent and settled.
+       * We wait for the transaction to be be finalized so we can read the account state
+       * to show to the user
+       *
+       */
       const result = await confirmTransaction(
         connection.value,
         txid!,

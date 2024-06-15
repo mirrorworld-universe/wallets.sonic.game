@@ -1,4 +1,9 @@
-# Nuxt 3 Minimal Starter
+# Sonic Transaction Builder & Sender Example:
+
+Program source code: https://beta.solpg.io/666dc15acffcf4b13384d187
+Demo URL: https://wallets.sonic.game
+
+## Contributing
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
