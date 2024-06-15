@@ -3,6 +3,7 @@ import {
   NightlyWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { BackpackWalletAdapter } from "~/lib/backpack";
+import { OKXWalletAdapter } from "~/lib/okx";
 import { _useWalletsStore, walletStorage } from "~/stores/wallets";
 import { pinia } from "~/stores/wallets";
 
@@ -14,7 +15,7 @@ export default defineNuxtPlugin({
 
     const { $subscribe, connectWallet, connected, setWallet, setWallets } =
       _useWalletsStore(pinia);
-    const wallets = [new BackpackWalletAdapter()];
+    const wallets = [new BackpackWalletAdapter(), new OKXWalletAdapter()];
 
     setWallets(wallets);
 

@@ -48,7 +48,6 @@ function openConnectDialog() {
 
 const {
   isInitialized,
-  greeterAccountAddress,
   initializeGreeterAccount,
   greetingAccount,
   incrementGreeter,

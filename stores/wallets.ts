@@ -9,13 +9,15 @@ import { createPinia, defineStore } from "pinia";
 import { wait } from "~/lib/timers";
 import { toast } from "vue-sonner";
 import type { BackpackWalletAdapter } from "~/lib/backpack";
+import type { OKXWalletAdapter } from "~/lib/okx";
 
 export const pinia = createPinia();
 
 export type WalletAdapter =
   | PhantomWalletAdapter
   | NightlyWalletAdapter
-  | BackpackWalletAdapter;
+  | BackpackWalletAdapter
+  | OKXWalletAdapter;
 
 export interface WalletState {
   wallet: WalletAdapter | null;

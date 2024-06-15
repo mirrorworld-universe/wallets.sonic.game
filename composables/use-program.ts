@@ -13,6 +13,7 @@ import {
   wait,
 } from "~/lib/transaction";
 import { useWalletsStore, type WalletAdapter } from "~/stores/wallets";
+import { useProgramEvents } from "./use-program-events";
 
 export type GreetingAccountType = {
   counter: number;
@@ -20,6 +21,7 @@ export type GreetingAccountType = {
 };
 
 export function useProgram() {
+  useProgramEvents();
   const { connection } = useConnection();
   const { wallet, connected } = useWalletsStore();
 
