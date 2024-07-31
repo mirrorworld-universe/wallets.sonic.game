@@ -13,7 +13,12 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 
-const DEFAULT_TIMEOUT = 180000;
+export function socketConnected(connection: Connection) {
+  // @ts-expect-error This property is not exposed in the public API
+  return connection._rpcWebSocketConnected;
+}
+
+const DEFAULT_TIMEOUT = 60000;
 const isDevMode = process.env.NODE_ENV === "development";
 
 export const wait = (milliseconds: number) => {
@@ -25,7 +30,7 @@ export async function awaitTransactionSignatureConfirmation(
   txid: TransactionSignature,
   timeout: number,
   connection: Connection,
-  commitment: Commitment = "recent",
+  commitment: Commitment = "processed",
   queryStatus = false
 ) {
   let done = false;
@@ -210,13 +215,15 @@ export const sendTransactionWithRetry = async (
     beforeSend();
   }
 
-  const { txid, slot } = await sendSignedTransaction({
+  console.log("tx hash", signedTransaction);
+
+  const { txid, slot, latency } = await sendSignedTransaction({
     connection,
     signedTransaction,
     commitment,
   });
 
-  return { txid, slot };
+  return { txid, slot, latency };
 };
 
 export const sendLegacyTransaction = async (
@@ -245,7 +252,7 @@ export const sendLegacyTransaction = async (
 export const sendTransaction = async (
   connection: Connection,
   wallet: WalletAdapter,
-  transaction: VersionedTransaction,
+  transaction: VersionedTransaction | Transaction,
   commitment: Commitment = "confirmed",
   beforeSend?: () => void
 ) => {
@@ -256,6 +263,10 @@ export const sendTransaction = async (
   if (beforeSend) {
     beforeSend();
   }
+
+  const signatures = signedTransaction.signatures
+    .map((sig) => sig.toString())
+    .map(console.log);
 
   const { txid, slot, latency } = await sendSignedTransaction({
     connection,
@@ -298,6 +309,7 @@ export async function sendSignedTransaction({
   }
 
   let done = false;
+
   (async () => {
     while (!done && getUnixTs() - startTime < timeout) {
       connection.sendRawTransaction(rawTransaction, {
@@ -309,27 +321,53 @@ export async function sendSignedTransaction({
   })();
 
   try {
-    const confirmation = await awaitTransactionSignatureConfirmation(
-      txid,
-      timeout,
-      connection
-    );
-    if (!confirmation)
-      throw new Error("Timed out awaiting confirmation on transaction");
-
-    if (confirmation.err) {
-      throw confirmation.err;
+    console.log("..... waiting for confirmation .....");
+    if (socketConnected(connection)) {
+      const result = await confirmTransaction(connection, txid, commitment);
+      console.log("transaction confirmed", result);
+    } else {
+      const signatureStatus = await awaitTransactionSignatureConfirmation(
+        txid,
+        timeout,
+        connection,
+        commitment,
+        true
+      );
+      console.log("signatureStatus", signatureStatus);
     }
-
-    slot = confirmation?.slot || 0;
-  } catch (err: any) {
+  } catch (error) {
     if (isDevMode) {
-      console.error(err);
+      console.error(error);
     }
     throw new Error("Transaction failed");
   } finally {
     done = true;
   }
+
+  // try {
+  //   console.log("confirming transaction ::", txid);
+  //   const confirmation = await awaitTransactionSignatureConfirmation(
+  //     txid,
+  //     timeout,
+  //     connection,
+  //     commitment
+  //   );
+  //   if (!confirmation)
+  //     throw new Error("Timed out awaiting confirmation on transaction");
+
+  //   if (confirmation.err) {
+  //     throw confirmation.err;
+  //   }
+
+  //   slot = confirmation?.slot || 0;
+  // } catch (err: any) {
+  //   if (isDevMode) {
+  //     console.error(err);
+  //   }
+  //   throw new Error("Transaction failed");
+  // } finally {
+  //   done = true;
+  // }
 
   const latency = getUnixTs() - startTime;
 
@@ -457,12 +495,25 @@ export async function confirmTransaction(
   signature: TransactionSignature,
   commitment: Commitment = "confirmed"
 ) {
-  const latestBlockHash = await connection.getLatestBlockhash();
-  return await connection.confirmTransaction(
-    {
+  if (socketConnected(connection)) {
+    const latestBlockHash = await connection.getLatestBlockhash();
+    return await connection.confirmTransaction(
+      {
+        signature,
+        ...latestBlockHash,
+      },
+      commitment
+    );
+  } else {
+    const signatureStatus = await awaitTransactionSignatureConfirmation(
       signature,
-      ...latestBlockHash,
-    },
-    commitment
-  );
+      DEFAULT_TIMEOUT,
+      connection,
+      commitment,
+      true
+    );
+
+    console.log("signatureStatus", signatureStatus);
+    return signatureStatus;
+  }
 }

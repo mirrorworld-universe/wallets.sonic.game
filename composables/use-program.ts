@@ -10,6 +10,7 @@ import { program } from "~/lib/program/core";
 import {
   confirmTransaction,
   sendLegacyTransaction,
+  sendTransactionWithRetry,
   wait,
 } from "~/lib/transaction";
 import { useWalletsStore, type WalletAdapter } from "~/stores/wallets";
@@ -143,10 +144,14 @@ export function useProgram() {
        * At this step we send the transaction to the cluster.
        *
        */
-      const { txid, slot } = await sendLegacyTransaction(
+      const { txid } = await sendTransactionWithRetry(
         connection.value,
         wallet! as WalletAdapter,
-        tx
+        tx.instructions,
+        [],
+        400_000,
+        500,
+        "processed"
       );
 
       /**
@@ -246,10 +251,14 @@ export function useProgram() {
         dismissible: false,
       });
 
-      const { txid, latency } = await sendLegacyTransaction(
+      const { txid, latency } = await sendTransactionWithRetry(
         connection.value,
         wallet! as WalletAdapter,
-        tx,
+        tx.instructions,
+        [],
+        400_000,
+        500,
+        "processed",
         undefined,
         () => {
           toast.loading(`Sending transaction ...`, {
@@ -258,6 +267,19 @@ export function useProgram() {
           });
         }
       );
+
+      // const { txid, latency } = await sendLegacyTransaction(
+      //   connection.value,
+      //   wallet! as WalletAdapter,
+      //   tx,
+      //   undefined,
+      //   () => {
+      //     toast.loading(`Sending transaction ...`, {
+      //       dismissible: false,
+      //       id: toastId,
+      //     });
+      //   }
+      // );
 
       toast.success(
         `Transaction sent in ${parseFloat(`${latency}`).toFixed(3)}s`,
